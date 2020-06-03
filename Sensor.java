@@ -13,6 +13,7 @@ public class Sensor {
         {
             this.tipo = t;
             this.valor = v;
+            sensores.add(this);
         }
         @Override
         public String toString() {
