@@ -25,7 +25,7 @@ public class Principal {
         Scanner reader = new Scanner(System.in);
         int num = 30;
         System.out.println("\nMenu: \n" +
-                "1. Añadir un Vehiculo\n" +
+                "1. AÃ±adir un Vehiculo\n" +
                 "2. Mostrar la informacion de los Vehiculos almacenados\n" +
                 "3. Mostrar la cantidad de Vehiculos almacenados\n" +
                 "4. Mostrar la informacion de los Vehiculos de color Verde\n" +
@@ -36,7 +36,7 @@ public class Principal {
                 "9. Mostrar la informacion del Vehiculo con mas sensores\n" +
                 "10. Mostrar la informacion de los Vehiculos almacenados en el archivo .txt\n" +
                 "666. Mostrar los sensores ordenados por valor\n" +
-                "777. Añadir Vehiculos desde la Web CarroYa\n" +
+                "777. AÃ±adir Vehiculos desde la Web CarroYa\n" +
                 "0. Finalizar Programa");
         while (num != 0) {
             System.out.println("Ingrese el Numero: ");
@@ -44,7 +44,7 @@ public class Principal {
             if (num == 1) {
                 System.out.println("Ingrese el modelo del Vehiculo");
                 int mo = reader.nextInt();
-                System.out.println("Ponga la marca del Vehiculo");
+                System.out.println("Ingrese la marca del Vehiculo");
                 reader.nextLine();
                 String ma = reader.nextLine();
                 System.out.println("Ingrese el valor del Vehiculo");
@@ -73,10 +73,10 @@ public class Principal {
                     System.out.println(v1.obtenerVehiculoPorId(id));
                 } catch (Exception e) {
                     System.out.println("ID no correspondiente a ningun Vehiculo");
-                    System.out.println("Excepción: " + e.getMessage() + "\n");
+                    System.out.println("ExcepciÃ³n: " + e.getMessage() + "\n");
                 }
             } else if (num == 6) {
-                System.out.print("Ingrese el ID del Vehiculo al que desea añadirle el Sensor");
+                System.out.print("Ingrese el ID del Vehiculo al que desea aÃ±adirle el Sensor");
                 int id = reader.nextInt();
                 System.out.print("Asigne el Tipo de Sensor");
                 reader.nextLine();
@@ -85,7 +85,7 @@ public class Principal {
                 double v = reader.nextDouble();
 
                 Sensor s1 = new Sensor(t, v);
-                v1.obtenerVehiculoPorId(id).añadirSensor(s1);
+                v1.obtenerVehiculoPorId(id).aÃ±adirSensor(s1);
 
 
             } else if (num == 7) {
@@ -139,70 +139,119 @@ public class Principal {
             
             	else if (num == 777) {
             			
-                for (int i=1; i<maxPaginas; i++){
-           				
-      	        String urlPage = String.format(url, i);
-      	        System.out.println("Entradas de: "+urlPage);
-            				 
-            	 if (getStatusConnectionCode(urlPage) == 200) {
-            					
-                 Document document = getHtmlDocument(urlPage);
-         
-                 Elements entradas = document.select("div.col-xs-12.col-sm-4");
-            				
-                 for (Element elem : entradas){
-                 String nombre = elem.getElementsByClass("car-ad-name").text();
-            	 String modelo = elem.getElementsByClass("car-ad-year").text();	
-            	 String ValorComercial = elem.getElementsByClass("car-ad-price").text();
-            						
-            	 Vehiculo v4 = new Vehiculo();
-            	  
-            	 System.out.println("Nombre: " +nombre+"\n"+ "Modelo: " +modelo+"\n"+ "Valor Comercial :" +ValorComercial+"\n");	         
-            	                } 
-                 }else{
-                 System.out.println("Status Code no es OK es: "+getStatusConnectionCode(urlPage));
-                 break;
+                int instancias = 5;
+                System.out.println();
+                String source = obtenerCodigoFuente("https://www.carroya.com/buscar/vehiculos/medellin/t4c239.do");
+
+                ArrayList<Integer> ID = new ArrayList<>();
+                ArrayList<Long> Modelos = new ArrayList<>();
+                ArrayList<String> Marcas = new ArrayList<>();
+                ArrayList<Long> Precios = new ArrayList<>();
+
+                int iID = 0;
+                int iActualID;
+                int iCID;
+
+                int iModelos = 0;
+                int iActualModelos;
+                int iCModelos;
+
+                int iMarcas = 0;
+                int iActualMarcas;
+                int iCMarcas;
+
+                int iPrecios = 0;
+                int iActualPrecios;
+                int iCPrecios;
+
+                String searchID = "data-idvehiculo=\"";
+                String searchModelo = "data-ano=\"";
+                String searchMarca = "data-brand=\"";
+                String searchPrecio = "data-price=\"";
+
+                for(int i = 0; i < instancias; i++){
+
+                    iActualModelos = source.indexOf(searchModelo, iModelos)+ searchModelo.length();
+                    iCModelos = source.indexOf("\"", iActualModelos);
+                    Modelos.add(Long.parseLong(source.substring(iActualModelos, iCModelos)));
+                    iModelos = iActualModelos;
+
+                    iActualMarcas = source.indexOf(searchMarca, iMarcas)+ searchMarca.length();
+                    iCMarcas = source.indexOf("\"", iActualMarcas);
+                    Marcas.add(source.substring(iActualMarcas, iCMarcas));
+                    iMarcas = iActualMarcas;
+
+                    iActualPrecios = source.indexOf(searchPrecio, iPrecios)+ searchPrecio.length();
+                    iCPrecios = source.indexOf("\"", iActualPrecios);
+                    Precios.add(Long.parseLong(source.substring(iActualPrecios, iCPrecios)));
+                    iPrecios = iActualPrecios;
+
+                    iActualID = source.indexOf(searchID, iID)+ searchID.length();
+                    iCID = source.indexOf("\"", iActualID);
+
+                    if(ID.contains(Integer.parseInt(source.substring(iActualID, iCID)))){
+
+                        Modelos.remove(Modelos.size()-1);
+                        Marcas.remove(Marcas.size()-1);
+                        Precios.remove(Precios.size()-1);
+                        iID = iActualID;
+                        i--;
+                    }
+
+                    ID.add(Integer.parseInt(source.substring(iActualID, iCID)));
+                    iID = iActualID;
+                }
+
+                    int indice = 0;
+                    int iActual;
+                    int iComilla;
+
+
+                    for(int i = 0; i < instancias; i++){
+
+                        iActual = source.indexOf(searchModelo, indice)+ searchModelo.length();
+                        iComilla = source.indexOf("\"", iActual);
+                        Modelos.add(Long.parseLong(source.substring(iActual, iComilla)));
+                        indice = iActual;
+                    }
+
+                    for(int i = 0; i < instancias; i++){
+
+                        iActual = source.indexOf(searchMarca, indice)+ searchMarca.length();
+                        iComilla = source.indexOf("\"", iActual);
+                        Marcas.add(source.substring(iActual, iComilla));
+                        indice = iActual;
+                    }
+
+                    for(int i = 0; i < instancias; i++){
+
+                        iActual = source.indexOf(searchPrecio, indice)+ searchPrecio.length();
+                        iComilla = source.indexOf("\"", iActual);
+                        Precios.add(Long.parseLong(source.substring(iActual, iComilla)));
+                        indice = iActual;
+                    }
+                    for(int i = 0; i<instancias; i++){
+
+                    Vehiculo v = new Vehiculo(Modelos.get(i).intValue(), Marcas.get(i), Precios.get(i));
+                }
             }
-         }
-      } 
-   }
-}
-       	 /**
-       	 * 		200 OK			300 Multiple Choices
-       	 * 		301 Moved Permanently	305 Use Proxy
-       	 * 		400 Bad Request		403 Forbidden
-       	 * 		404 Not Found		500 Internal Server Error
-       	 * 		502 Bad Gateway		503 Service Unavailable
-       	 * @param url
-       	 * @return
-       	 */
-   public static int getStatusConnectionCode (String url) {
-		
-       Response response = null;
-		
-       try {
-           response = Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).ignoreHttpErrors(true).execute();
-       } catch (IOException ex) {
-           System.out.println("Excepción Status Code: " + ex.getMessage());
-       }
-       return response.statusCode();
-   }
+        }
+    }
 
- 		/*
-   		 * @param url
-   		 * @return
-   		 */
-    public static Document getHtmlDocument(String url) {
+    private static String obtenerCodigoFuente(String ruta) throws IOException {
 
-        Document doc = null;
+        URL url = new URL(ruta);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+        String Code = "";
+        String lineaAct;
 
-        try {
-            doc = Jsoup.connect(url).userAgent("Mozilla/5.0").timeout(100000).get();
-        } catch (IOException ex) {
-            System.out.println("Excepción HTML" + ex.getMessage());
+        while((lineaAct = reader.readLine()) != null){
+
+            Code = Code + lineaAct;
         }
 
-        return doc;
+        reader.close();
+        return Code;
     }
-            }
+}
 
